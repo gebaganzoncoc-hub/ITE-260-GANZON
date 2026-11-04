@@ -1,0 +1,748 @@
+
+# ---------- STUDENT RECORDS ----------
+
+students = [
+    ["01-2345-678901", "Fisher, Conrad E.", "BSIT", "1st Year",
+     "Regular", "09123456789", "FA1-BSIT1-01"],
+    ["01-2345-678902", "Santos, Juan D.", "BSIT", "1st Year",
+     "Regular", "09123456780", "FA1-BSIT1-01"],
+    ["01-2345-678903", "Cruz, Maria L.", "BSIT", "1st Year",
+     "Irregular", "09123456781", "FA1-BSIT1-01"],
+
+    ["02-2345-678901", "Reyes, Mark A.", "BSIT", "1st Year",
+     "Regular", "09223456789", "FA2-BSIT1-02"],
+    ["02-2345-678902", "Garcia, Ana M.", "BSIT", "1st Year",
+     "Transferee", "09223456780", "FA2-BSIT1-02"],
+    ["02-2345-678903", "Lopez, Carlo B.", "BSIT", "1st Year",
+     "Regular", "09223456781", "FA2-BSIT1-02"],
+
+    ["03-2345-678901", "Dela Cruz, John P.", "BSIT", "1st Year",
+     "Regular", "09323456789", "FB2-BSIT1-02"],
+    ["03-2345-678902", "Mendoza, Lisa R.", "BSIT", "1st Year",
+     "Irregular", "09323456780", "FB2-BSIT1-02"],
+    ["03-2345-678903", "Torres, Kevin J.", "BSIT", "1st Year",
+     "Regular", "09323456781", "FB2-BSIT1-02"]
+]
+
+# ---------- DEMO ACCOUNTS ----------
+
+accounts = {
+    "instructor1": {
+        "password": "Teach123",
+        "role": "Instructor"
+    },
+    "admin01": {
+        "password": "Admin123",
+        "role": "Admin"
+    },
+    "student01": {
+        "password": "Student123",
+        "role": "Student",
+        "student_id": "01-2345-678901"
+    }
+}
+
+courses = ["BSIT", "BSCS", "BSBA", "BSED",
+           "BSHM", "BSCE", "BSCOE"]
+
+year_levels = ["1st Year", "2nd Year", "3rd Year", "4th Year"]
+statuses = ["Regular", "Irregular", "Transferee", "Graduated"]
+
+sections = [
+    "FA1-BSIT1-01",
+    "FA2-BSIT1-02",
+    "FB2-BSIT1-02"
+]
+
+attendance = {}
+
+
+# ---------- VALIDATION FUNCTIONS ----------
+
+def valid_student_id(student_id):
+    parts = student_id.split("-")
+
+    return (
+        len(parts) == 3
+        and parts[0].isdigit() and len(parts[0]) == 2
+        and parts[1].isdigit() and len(parts[1]) == 4
+        and parts[2].isdigit() and len(parts[2]) == 6
+    )
+
+
+def valid_name(name):
+    return bool(name.strip()) and all(
+        character.isalpha() or character in " ., "
+        for character in name
+    )
+
+
+def valid_contact(contact):
+    return contact.isdigit() and len(contact) == 11
+
+
+def valid_username(username):
+    return username.isalnum()
+
+
+def valid_password(password):
+    return (
+        8 <= len(password) <= 15
+        and password.isalnum()
+        and any(character.isalpha() for character in password)
+        and any(character.isdigit() for character in password)
+    )
+
+
+def select_option(title, options):
+    while True:
+        print("\n" + title)
+
+        for number, option in enumerate(options, start=1):
+            print(f"{number}. {option}")
+
+        choice = input("Enter choice: ").strip()
+
+        if choice.isdigit():
+            choice = int(choice)
+
+            if 1 <= choice <= len(options):
+                return options[choice - 1]
+
+        print("Invalid choice. Please try again.")
+
+
+def find_student(student_id):
+    for student in students:
+        if student[0] == student_id:
+            return student
+
+    return None
+
+
+def input_student_id():
+    while True:
+        student_id = input(
+            "Enter Student ID (00-0000-000000): "
+        ).strip()
+
+        if not valid_student_id(student_id):
+            print("Invalid format. Use 00-0000-000000.")
+        elif find_student(student_id):
+            print("Student ID already exists.")
+        else:
+            return student_id
+
+
+def input_name():
+    while True:
+        name = input("Enter Full Name: ").strip()
+
+        if valid_name(name):
+            return name
+
+        print("Use letters, spaces, commas, or periods only.")
+
+
+def input_contact():
+    while True:
+        contact = input(
+            "Enter Contact Number (11 digits): "
+        ).strip()
+
+        if valid_contact(contact):
+            return contact
+
+        print("Contact number must contain exactly 11 digits.")
+
+
+def input_existing_student_id():
+    while True:
+        student_id = input(
+            "Enter Student ID (or 0 to return): "
+        ).strip()
+
+        if student_id == "0":
+            return None
+
+        if not valid_student_id(student_id):
+            print("Invalid format. Use 00-0000-000000.")
+            continue
+
+        student = find_student(student_id)
+
+        if student is None:
+            print("Student record not found. Try again.")
+            continue
+
+        return student
+
+
+# ---------- LOGIN ----------
+
+def login():
+    while True:
+        print("\n" + "=" * 40)
+        print(" STUDENT INFORMATION SYSTEM")
+        print("=" * 40)
+
+        username = input("Username: ").strip()
+
+        if not valid_username(username):
+            print("Username must contain letters and numbers only.")
+            continue
+
+        if username not in accounts:
+            print("Account not found. Please try again.")
+            continue
+
+        account = accounts[username]
+
+        while True:
+            password = input("Password: ").strip()
+
+            if not valid_password(password):
+                print("Password must be 8-15 characters.")
+                print("Include at least one letter and one number.")
+                continue
+
+            if password != account["password"]:
+                print("Incorrect password. Try again.")
+                continue
+
+            break
+
+        role = account["role"]
+
+        print("\n" + "=" * 40)
+        print(" LOGIN SUCCESSFUL")
+        print("Welcome,", role + "!")
+        print("=" * 40)
+
+        if role == "Instructor":
+            section = section_assignment()
+            instructor_menu(section)
+
+        elif role == "Admin":
+            admin_menu()
+
+        elif role == "Student":
+            student_menu(account["student_id"])
+
+
+
+# ---------- SECTION SELECTION ----------
+
+def section_assignment():
+    print("\n" + "=" * 40)
+    print(" SECTION SELECTION")
+    print("=" * 40)
+
+    return select_option("Choose Your Section:", sections)
+
+
+# ---------- ADD STUDENT ----------
+
+def add_student(section=None):
+    print("\n" + "=" * 40)
+    print(" ADD STUDENT")
+    print("=" * 40)
+
+    student_id = input_student_id()
+    name = input_name()
+    course = select_option("Select Course:", courses)
+    year_level = select_option("Select Year Level:", year_levels)
+    status = select_option("Select Student Status:", statuses)
+    contact = input_contact()
+
+    if section is None:
+        section = select_option("Select Student Section:", sections)
+
+    students.append([
+        student_id, name, course, year_level,
+        status, contact, section
+    ])
+
+    print("\nStudent record added successfully!")
+    print("Student ID:", student_id)
+    print("Full Name:", name)
+    print("Section:", section)
+
+
+# ---------- SEARCH STUDENT ----------
+
+def search_student(section=None):
+    print("\n" + "=" * 40)
+    print(" SEARCH STUDENT")
+    print("=" * 40)
+
+    while True:
+        student_id = input(
+            "Enter Student ID (or 0 to return): "
+        ).strip()
+
+        if student_id == "0":
+            return
+
+        if not valid_student_id(student_id):
+            print("Invalid format. Use 00-0000-000000.")
+            continue
+
+        student = find_student(student_id)
+
+        if student is None:
+            print("Student not found. Please try again.")
+            continue
+
+        if section is not None and student[6] != section:
+            print("Student not found in your section.")
+            continue
+
+        print("\nSTUDENT FOUND")
+        print("Student ID:", student[0])
+        print("Full Name:", student[1])
+        print("Course:", student[2])
+        print("Year Level:", student[3])
+        print("Status:", student[4])
+        print("Contact Number:", student[5])
+        print("Section:", student[6])
+        return
+
+
+# ---------- VIEW STUDENTS ----------
+
+def view_students(section=None):
+    print("\n" + "=" * 40)
+    print(" STUDENT LIST")
+    print("=" * 40)
+
+    if section is None:
+        section_students = students
+        print("Viewing students from all sections.")
+    else:
+        section_students = [
+            student for student in students
+            if student[6] == section
+        ]
+        print("Section:", section)
+
+    if not section_students:
+        print("No student records found.")
+        return
+
+    for number, student in enumerate(section_students, start=1):
+        print(f"\nStudent {number}")
+        print("-" * 30)
+        print("Student ID:", student[0])
+        print("Full Name:", student[1])
+        print("Course:", student[2])
+        print("Year Level:", student[3])
+        print("Status:", student[4])
+        print("Contact Number:", student[5])
+        print("Section:", student[6])
+
+
+# ---------- UPDATE STUDENT ----------
+
+def update_student():
+    print("\n" + "=" * 40)
+    print(" UPDATE STUDENT RECORD")
+    print("=" * 40)
+
+    student = input_existing_student_id()
+
+    if student is None:
+        return
+
+    while True:
+        print("\n1. Student ID")
+        print("2. Full Name")
+        print("3. Course")
+        print("4. Year Level")
+        print("5. Student Status")
+        print("6. Contact Number")
+        print("7. Section")
+        print("8. Finish Updating")
+
+        choice = input("Enter choice: ").strip()
+
+        if choice == "1":
+            while True:
+                new_id = input(
+                    "Enter new Student ID (00-0000-000000): "
+                ).strip()
+
+                if not valid_student_id(new_id):
+                    print("Invalid Student ID format.")
+                    continue
+
+                if find_student(new_id):
+                    print("Student ID already exists.")
+                    continue
+
+                old_id = student[0]
+                student[0] = new_id
+
+                for account in accounts.values():
+                    if account.get("student_id") == old_id:
+                        account["student_id"] = new_id
+
+                if old_id in attendance:
+                    attendance[new_id] = attendance.pop(old_id)
+
+                print("Student ID updated successfully.")
+                break
+
+        elif choice == "2":
+            student[1] = input_name()
+            print("Name updated successfully.")
+
+        elif choice == "3":
+            student[2] = select_option("Select Course:", courses)
+            print("Course updated successfully.")
+
+        elif choice == "4":
+            student[3] = select_option(
+                "Select Year Level:", year_levels
+            )
+            print("Year level updated successfully.")
+
+        elif choice == "5":
+            student[4] = select_option(
+                "Select Student Status:", statuses
+            )
+            print("Student status updated successfully.")
+
+        elif choice == "6":
+            student[5] = input_contact()
+            print("Contact number updated successfully.")
+
+        elif choice == "7":
+            student[6] = select_option(
+                "Select New Section:", sections
+            )
+            print("Section updated successfully.")
+
+        elif choice == "8":
+            print("Finished updating student record.")
+            return
+
+        else:
+            print("Invalid choice. Please select 1-8.")
+
+
+# ---------- DELETE STUDENT ----------
+
+def delete_student():
+    print("\n" + "=" * 40)
+    print(" DELETE STUDENT RECORD")
+    print("=" * 40)
+
+    student = input_existing_student_id()
+
+    if student is None:
+        return
+
+    print("\nStudent ID:", student[0])
+    print("Full Name:", student[1])
+    print("Section:", student[6])
+
+    while True:
+        confirm = input(
+            "Delete this record? (Y/N): "
+        ).strip().upper()
+
+        if confirm == "Y":
+            student_id = student[0]
+            students.remove(student)
+
+            linked_accounts = [
+                username for username, account in accounts.items()
+                if account.get("student_id") == student_id
+            ]
+
+            for username in linked_accounts:
+                del accounts[username]
+
+            attendance.pop(student_id, None)
+
+            print("Student record deleted successfully.")
+            return
+
+        elif confirm == "N":
+            print("Deletion cancelled.")
+            return
+
+        else:
+            print("Please enter Y or N.")
+
+
+# ---------- STUDENT PROFILE ----------
+
+def student_profile(student_id):
+    student = find_student(student_id)
+
+    if student is None:
+        print("Your student record could not be found.")
+        return
+
+    print("\n" + "=" * 40)
+    print(" MY STUDENT PROFILE")
+    print("=" * 40)
+    print("Full Name:", student[1])
+    print("Section:", student[6])
+    print("Course:", student[2])
+    print("Year Level:", student[3])
+    print("Status:", student[4])
+
+
+# ---------- RECORD ATTENDANCE ----------
+
+def record_attendance(section=None):
+    print("\n" + "=" * 40)
+    print(" RECORD STUDENT ATTENDANCE")
+    print("=" * 40)
+
+    while True:
+        student_id = input(
+            "Enter Student ID (or 0 to return): "
+        ).strip()
+
+        if student_id == "0":
+            return
+
+        if not valid_student_id(student_id):
+            print("Invalid format. Use 00-0000-000000.")
+            continue
+
+        student = find_student(student_id)
+
+        if student is None:
+            print("Student not found. Try again.")
+            continue
+
+        if section is not None and student[6] != section:
+            print("Student is not in your assigned section.")
+            continue
+
+        break
+
+    print("Student:", student[1])
+    print("Section:", student[6])
+    print("Date:", date.today().isoformat())
+
+    attendance_status = select_option(
+        "Select Attendance Status:",
+        ["Present", "Absent", "Late", "Excused"]
+    )
+
+    attendance_date = input(
+        "Enter attendance date (YYYY-MM-DD), "
+        "or press Enter for today: "
+    ).strip()
+
+    if not attendance_date:
+        attendance_date = date.today().isoformat()
+
+    try:
+        date.fromisoformat(attendance_date)
+    except ValueError:
+        print("Invalid date. Use YYYY-MM-DD.")
+        return
+
+    records = attendance.setdefault(student_id, {})
+
+    if attendance_date in records:
+        confirm = input(
+            "Attendance already exists. Replace it? (Y/N): "
+        ).strip().upper()
+
+        if confirm != "Y":
+            print("Attendance update cancelled.")
+            return
+
+    records[attendance_date] = attendance_status
+    print("Attendance recorded successfully.")
+    print("Student:", student[1])
+    print("Date:", attendance_date)
+    print("Status:", attendance_status)
+
+
+# ---------- VIEW MY ATTENDANCE ----------
+
+def view_my_attendance(student_id):
+    print("\n" + "=" * 40)
+    print(" MY ATTENDANCE RECORDS")
+    print("=" * 40)
+
+    student = find_student(student_id)
+
+    if student is None:
+        print("Student record not found.")
+        return
+
+    print("Student:", student[1])
+    records = attendance.get(student_id, {})
+
+    if not records:
+        print("No attendance records yet.")
+        return
+
+    for attendance_date in sorted(records):
+        print(attendance_date, "-", records[attendance_date])
+
+
+# ---------- VIEW ATTENDANCE REPORT ----------
+
+def view_all_attendance(section=None):
+    print("\n" + "=" * 40)
+    print(" ATTENDANCE REPORT")
+    print("=" * 40)
+
+    found = False
+
+    for student in students:
+        if section is not None and student[6] != section:
+            continue
+
+        records = attendance.get(student[0], {})
+
+        for attendance_date, status in sorted(records.items()):
+            print(
+                student[1], "|",
+                student[0], "|",
+                student[6], "|",
+                attendance_date, "|",
+                status
+            )
+            found = True
+
+    if not found:
+        print("No attendance records found.")
+
+
+# ---------- STUDENT MENU ----------
+
+def student_menu(student_id):
+    while True:
+        student = find_student(student_id)
+
+        if student is None:
+            print("Your student record is unavailable.")
+            return
+
+        print("\n" + "=" * 40)
+        print(" STUDENT MENU")
+        print("=" * 40)
+        print("Welcome,", student[1])
+        print("1. My Student Information")
+        print("2. View My Attendance")
+        print("3. Log Out")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            student_profile(student_id)
+
+        elif choice == "2":
+            
+            view_my_attendance(student_id)
+
+        elif choice == "3":
+            print("You have successfully logged out.")
+            return
+
+        else:
+            print("Invalid choice. Please select 1-3.")
+
+
+# ---------- INSTRUCTOR MENU ----------
+
+def instructor_menu(section):
+    while True:
+        print("\n" + "=" * 40)
+        print(" INSTRUCTOR MENU")
+        print("=" * 40)
+        print("Section:", section)
+        print("1. Add Student")
+        print("2. Search Student")
+        print("3. View Students")
+        print("4. Record Attendance")
+        print("5. View Attendance")
+        print("6. Log Out")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            add_student(section)
+
+        elif choice == "2":
+            search_student(section)
+
+        elif choice == "3":
+            view_students(section)
+
+        elif choice == "4":
+            record_attendance(section)
+
+        elif choice == "5":
+            view_all_attendance(section)
+
+        elif choice == "6":
+            print("You have successfully logged out.")
+            return
+
+        else:
+            print("Invalid choice. Please select 1-6.")
+
+
+# ---------- ADMIN MENU ----------
+
+def admin_menu():
+    while True:
+        print("\n" + "=" * 40)
+        print(" ADMIN MENU")
+        print("=" * 40)
+        print("1. Add Student")
+        print("2. Search Student")
+        print("3. View All Students")
+        print("4. Update Student Information")
+        print("5. Delete Student Record")
+        print("6. Record Attendance")
+        print("7. View All Attendance")
+        print("8. Log Out")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            add_student()
+
+        elif choice == "2":
+            search_student()
+
+        elif choice == "3":
+            view_students()
+
+        elif choice == "4":
+            update_student()
+
+        elif choice == "5":
+            delete_student()
+
+        elif choice == "6":
+            record_attendance()
+
+        elif choice == "7":
+            view_all_attendance()
+
+        elif choice == "8":
+            print("You have successfully logged out.")
+            return
+
+        else:
+            print("Invalid choice. Please select 1-8.")
+
+
+
+login()
+    
